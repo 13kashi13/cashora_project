@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — CASHORA.TECH</title>
+    <link href="https://framerusercontent.com/images/AxQMXkb9SNyxDMp63XvKlzyGFo.png" rel="icon">
+    
+    <!-- ApexCharts for better professional charts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg:      #0a0a0a;
+            --card:    #111111;
+            --card2:   #161616;
+            --border:  #222222;
+            --border2: #1a1a1a;
+            --blue:    #1c2bff;
+            --blue-s:  #3344ff;
+            --white:   #f5f5f5;
+            --light:   #d4d4d4;
+            --muted:   #666666;
+            --muted2:  #444444;
+            --green:   #16a34a;
+            --green-bg:#0d1f14;
+            --red:     #dc2626;
+            --red-bg:  #1f0d0d;
+            --amber:   #b45309;
+            --amber-bg:#1f1708;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ═══ SIDEBAR ═══ */
+        .sidebar {
+            width: 220px;
+            min-height: 100vh;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 100;
+        }
+        .sidebar-logo { padding: 22px 20px 18px; border-bottom: 1px solid var(--border); }
+        .sidebar-logo img { width: 120px; height: auto; }
+
+        .sidebar-nav { flex: 1; padding: 12px 8px; display: flex; flex-direction: column; gap: 1px; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 9px;
+            padding: 9px 12px; border-radius: 8px;
+            color: var(--muted); text-decoration: none;
+            font-size: 13.5px; font-weight: 500;
+            cursor: pointer; transition: all 0.15s; border: none; background: none; width: 100%; text-align: left;
+        }
+        .nav-item svg { flex-shrink: 0; }
+        .nav-item:hover { background: #181818; color: var(--light); }
+        .nav-item.active { background: #13183a; color: #6677ff; }
+        .nav-item.active svg { color: #6677ff; }
+
+        .sidebar-bottom { border-top: 1px solid var(--border); padding: 12px 8px; }
+        .sidebar-user { display: flex; align-items: center; gap: 9px; padding: 9px 12px; border-radius: 8px; background: #141414; margin-bottom: 2px; }
+        .s-avatar { width: 30px; height: 30px; border-radius: 6px; background: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; overflow: hidden; }
+        .s-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .s-user-info { flex: 1; min-width: 0; }
+        .s-user-name { font-size: 12.5px; font-weight: 600; color: var(--light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .s-user-sub  { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .signout-btn { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 500; transition: all 0.15s; }
+        .signout-btn:hover { background: var(--red-bg); color: var(--red); }
+
+        /* ═══ MAIN ═══ */
+        .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
+
+        /* TOPBAR */
+        .topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 28px; height: 56px; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 50; }
+        .topbar-title { font-size: 14px; font-weight: 600; color: var(--white); }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-user { display: flex; align-items: center; gap: 8px; padding: 5px 12px 5px 6px; border-radius: 7px; border: 1px solid var(--border); background: var(--card); }
+        .t-avatar { width: 26px; height: 26px; border-radius: 5px; background: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; overflow: hidden; }
+        .t-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .t-name { font-size: 12.5px; font-weight: 600; color: var(--light); }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+        .topbar-link { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 7px; border: 1px solid var(--border); font-size: 12.5px; font-weight: 500; color: var(--muted); text-decoration: none; transition: all 0.15s; }
+        .topbar-link:hover { color: var(--light); background: #141414; }
+
+        /* ═══ PAGES ═══ */
+        .page { display: none; padding: 28px; flex: 1; }
+        .page.active { display: block; }
+
+        /* ── SHARED ── */
+        .page-title { font-size: 18px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+        .page-sub   { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+
+        .panel { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; }
+        .panel-title { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+        .panel-sub   { font-size: 12px; color: var(--muted); }
+
+        /* ══════════════════════════════
+           DASHBOARD PAGE
+        ══════════════════════════════ */
+        .cta-banner { display: flex; align-items: center; justify-content: space-between; background: #0e1024; border: 1px solid #1e2450; border-radius: 12px; padding: 22px 26px; margin-bottom: 24px; }
+        .cta-text h2 { font-size: 17px; font-weight: 700; color: var(--white); margin-bottom: 5px; }
+        .cta-text p  { font-size: 13px; color: var(--muted); max-width: 440px; line-height: 1.5; }
+        .cta-btn { display: flex; align-items: center; gap: 7px; padding: 11px 20px; background: var(--blue); color: #fff; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; border: none; text-decoration: none; white-space: nowrap; transition: all 0.15s; }
+        .cta-btn:hover { background: var(--blue-s); }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+        .stat-row { display: flex; align-items: center; justify-content: space-between; }
+        .stat-label { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+        .stat-icon  { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+        .stat-value { font-size: 26px; font-weight: 700; color: var(--white); letter-spacing: -0.03em; line-height: 1; }
+        .stat-change { font-size: 11.5px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .stat-change.up   { color: #4ade80; }
+        .stat-change.down { color: var(--red); }
+        .stat-change .c-sub { font-weight: 400; color: var(--muted); margin-left: 2px; }
+
+        .two-col { display: grid; grid-template-columns: 1.5fr 1fr; gap: 12px; }
+        .panel-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+        .panel-link { font-size: 12px; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+        .panel-link:hover { color: var(--light); }
+
+        .activity-list { display: flex; flex-direction: column; }
+        .act-item { display: flex; align-items: flex-start; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--border2); }
+        .act-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .act-item:first-child { padding-top: 0; }
+        .act-icon { width: 32px; height: 32px; border-radius: 7px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+        .act-body { flex: 1; }
+        .act-name { font-size: 13px; font-weight: 600; color: var(--light); line-height: 1.35; }
+        .act-desc { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+        .act-right { text-align: right; flex-shrink: 0; padding-left: 8px; }
+        .act-time  { font-size: 11px; color: var(--muted2); }
+
+        .badge { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 4px; font-size: 10.5px; font-weight: 600; margin-top: 5px; letter-spacing: 0.02em; }
+        .badge.green  { background: var(--green-bg);  color: #4ade80; border: 1px solid #14532d; }
+        .badge.blue   { background: #0d1224;           color: #6677ff; border: 1px solid #1e2450; }
+        .badge.amber  { background: var(--amber-bg);  color: #fbbf24; border: 1px solid #451a03; }
+        .badge.muted  { background: #141414;            color: var(--muted); border: 1px solid var(--border); }
+        .badge.red    { background: var(--red-bg);     color: #f87171; border: 1px solid #7f1d1d; }
+
+        .quick-actions { display: flex; flex-direction: column; gap: 8px; }
+        .q-btn { display: flex; align-items: center; gap: 11px; padding: 13px 14px; border-radius: 8px; background: transparent; border: 1px solid var(--border); cursor: pointer; text-decoration: none; transition: all 0.15s; }
+        .q-btn:hover { background: #141414; border-color: #2a2a2a; }
+        .q-icon { width: 32px; height: 32px; border-radius: 7px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--muted); }
+        .q-text { flex: 1; }
+        .q-label { font-size: 13px; font-weight: 600; color: var(--light); }
+        .q-desc  { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+        .q-arrow { color: var(--muted2); font-size: 14px; }
+
+        /* ══════════════════════════════
+           CREATE PAGE
+        ══════════════════════════════ */
+        .create-layout { display: grid; grid-template-columns: 1fr 340px; gap: 16px; align-items: start; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+
+        .prompt-wrap { position: relative; }
+        .prompt-input {
+            width: 100%; min-height: 140px; resize: vertical;
+            background: #0e0e0e; border: 1px solid var(--border);
+            border-radius: 10px; padding: 14px 16px;
+            font-size: 14px; color: var(--light); font-family: inherit;
+            line-height: 1.6; transition: border-color 0.15s; outline: none;
+        }
+        .prompt-input:focus { border-color: #2a3380; }
+        .prompt-input::placeholder { color: var(--muted2); }
+        .prompt-count { position: absolute; bottom: 10px; right: 12px; font-size: 11px; color: var(--muted2); }
+
+        .platform-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+        .platform-toggle { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border-radius: 8px; border: 1px solid var(--border); background: #0e0e0e; cursor: pointer; transition: all 0.15s; user-select: none; }
+        .platform-toggle:hover { border-color: #333; }
+        .platform-toggle.selected { border-color: #2a3380; background: #0d1024; }
+        .platform-toggle .pt-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; background: #181818; }
+        .platform-toggle .pt-name { font-size: 11px; font-weight: 600; color: var(--muted); }
+        .platform-toggle.selected .pt-name { color: #6677ff; }
+
+        .toggle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .select-input { width: 100%; background: #0e0e0e; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--light); font-family: inherit; outline: none; cursor: pointer; transition: border-color 0.15s; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+        .select-input:focus { border-color: #2a3380; }
+
+        .generate-btn { width: 100%; padding: 14px; background: var(--blue); color: #fff; font-size: 14px; font-weight: 700; border-radius: 10px; border: none; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; letter-spacing: 0.01em; }
+        .generate-btn:hover { background: var(--blue-s); }
+        .generate-btn:disabled { background: #1a1a2e; color: var(--muted); cursor: not-allowed; }
+
+        /* Progress stepper */
+        .progress-panel { display: none; }
+        .progress-panel.visible { display: block; }
+
+        .stepper { display: flex; align-items: center; margin-bottom: 24px; }
+        .step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+        .step-circle { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border); background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--muted); transition: all 0.4s; }
+        .step-label { font-size: 10.5px; font-weight: 600; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+        .step-line { flex: 1; height: 1px; background: var(--border); margin: 0 4px; margin-bottom: 20px; transition: background 0.4s; }
+
+        .step.done   .step-circle { border-color: #4ade80; background: var(--green-bg); color: #4ade80; }
+        .step.done   .step-label  { color: #4ade80; }
+        .step.active .step-circle { border-color: #6677ff; background: #13183a; color: #6677ff; }
+        .step.active .step-label  { color: #6677ff; }
+        .step-line.done { background: #4ade80; }
+        .step-line.active { background: #6677ff; }
+
+        .step-status { display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: #0d1024; border: 1px solid #1e2450; border-radius: 8px; margin-bottom: 14px; }
+        .step-spinner { width: 16px; height: 16px; border: 2px solid #1e2450; border-top-color: #6677ff; border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .step-status-text { font-size: 13px; font-weight: 500; color: var(--light); }
+        .step-status-sub  { font-size: 11.5px; color: var(--muted); }
+
+        .progress-bar-wrap { background: var(--border2); border-radius: 999px; height: 4px; overflow: hidden; margin-bottom: 20px; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #1c2bff, #6677ff); border-radius: 999px; transition: width 0.6s ease; }
+
+        .done-card { display: none; background: var(--green-bg); border: 1px solid #14532d; border-radius: 10px; padding: 20px; text-align: center; }
+        .done-card.visible { display: block; }
+        .done-card h3 { font-size: 16px; font-weight: 700; color: #4ade80; margin-bottom: 6px; }
+        .done-card p  { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+        .done-actions { display: flex; gap: 8px; justify-content: center; }
+        .done-btn { padding: 9px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; text-decoration: none; }
+        .done-btn.primary { background: var(--blue); color: #fff; }
+        .done-btn.primary:hover { background: var(--blue-s); }
+        .done-btn.secondary { background: #141414; color: var(--light); border: 1px solid var(--border); }
+        .done-btn.secondary:hover { background: #1a1a1a; }
+
+        /* Create sidebar panel */
+        .create-side { display: flex; flex-direction: column; gap: 12px; }
+        .tip-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+        .tip-card h4 { font-size: 12.5px; font-weight: 700; color: var(--light); margin-bottom: 10px; }
+        .tip-item { display: flex; align-items: flex-start; gap: 7px; margin-bottom: 8px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+        .tip-dot  { width: 4px; height: 4px; border-radius: 50%; background: var(--muted2); margin-top: 5px; flex-shrink: 0; }
+
+        /* ══════════════════════════════
+           LIBRARY PAGE
+        ══════════════════════════════ */
+        .lib-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; }
+        .lib-filters { display: flex; gap: 6px; }
+        .filter-btn { padding: 6px 14px; border-radius: 6px; font-size: 12.5px; font-weight: 500; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; }
+        .filter-btn:hover  { background: #141414; color: var(--light); }
+        .filter-btn.active { background: #13183a; border-color: #1e2450; color: #6677ff; }
+        .lib-new-btn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--blue); color: #fff; font-size: 13px; font-weight: 600; border-radius: 7px; cursor: pointer; border: none; transition: all 0.15s; }
+        .lib-new-btn:hover { background: var(--blue-s); }
+
+        .video-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+
+        .video-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: border-color 0.15s; }
+        .video-card:hover { border-color: #2a2a2a; }
+
+        .video-thumb { width: 100%; aspect-ratio: 16/9; background: #0e0e0e; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .thumb-gradient { position: absolute; inset: 0; }
+        .thumb-play { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; z-index: 1; }
+
+        .video-body { padding: 14px 14px 10px; }
+        .video-title { font-size: 13px; font-weight: 600; color: var(--light); line-height: 1.35; margin-bottom: 8px; }
+        .video-meta  { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .video-date  { font-size: 11px; color: var(--muted); }
+        .platform-icons { display: flex; gap: 4px; }
+        .p-icon { width: 18px; height: 18px; border-radius: 4px; background: #181818; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
+
+        .video-actions { display: flex; gap: 6px; border-top: 1px solid var(--border2); padding-top: 10px; }
+        .v-btn { flex: 1; padding: 6px 0; border-radius: 6px; font-size: 11.5px; font-weight: 600; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .v-btn:hover { background: #141414; color: var(--light); }
+        .v-btn.publish { border-color: #1e2450; color: #6677ff; }
+        .v-btn.publish:hover { background: #0d1024; }
+        .v-btn.del:hover { background: var(--red-bg); color: #f87171; border-color: #7f1d1d; }
+
+        /* ══════════════════════════════
+           ANALYTICS PAGE
+        ══════════════════════════════ */
+        .analytics-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 24px; }
+
+        .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; }
+        .chart-title { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+        .chart-sub   { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+
+        .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 100px; }
+        .bar-wrap  { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+        .bar       { width: 100%; border-radius: 4px 4px 0 0; background: #1e2450; transition: background 0.15s; min-height: 4px; }
+        .bar:hover { background: #3344ff; }
+        .bar-label { font-size: 9.5px; color: var(--muted); }
+        .bar.highlight { background: var(--blue); }
+
+        .platform-rows { display: flex; flex-direction: column; gap: 12px; }
+        .plat-row  { display: flex; flex-direction: column; gap: 5px; }
+        .plat-header { display: flex; justify-content: space-between; align-items: center; }
+        .plat-name { font-size: 12.5px; font-weight: 500; color: var(--light); }
+        .plat-val  { font-size: 12.5px; font-weight: 600; color: var(--white); }
+        .prog { width: 100%; height: 4px; background: var(--border2); border-radius: 999px; overflow: hidden; }
+        .prog-fill { height: 100%; border-radius: 999px; }
+
+        /* ══════════════════════════════
+           DISTRIBUTION PAGE
+        ══════════════════════════════ */
+        .dist-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .dist-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; }
+        .dist-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .dist-card-title  { font-size: 14px; font-weight: 700; color: var(--white); }
+
+        .conn-list { display: flex; flex-direction: column; gap: 10px; }
+        .conn-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: #0e0e0e; }
+        .conn-icon { width: 32px; height: 32px; border-radius: 7px; background: #181818; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .conn-info { flex: 1; }
+        .conn-name   { font-size: 13px; font-weight: 600; color: var(--light); }
+        .conn-handle { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+        .conn-toggle { width: 34px; height: 18px; border-radius: 999px; background: var(--blue); position: relative; cursor: pointer; flex-shrink: 0; }
+        .conn-toggle::after { content: ''; position: absolute; top: 2px; right: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: right 0.2s; }
+        .conn-toggle.off { background: #222; }
+        .conn-toggle.off::after { right: auto; left: 2px; }
+
+        .schedule-list { display: flex; flex-direction: column; gap: 8px; }
+        .sched-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); }
+        .sched-time { font-size: 12px; font-weight: 600; color: var(--muted); min-width: 54px; }
+        .sched-body { flex: 1; }
+        .sched-title  { font-size: 13px; font-weight: 600; color: var(--light); }
+        .sched-plats  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+        /* ══════════════════════════════
+           SETTINGS PAGE
+        ══════════════════════════════ */
+        .settings-layout { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: start; }
+        .settings-menu { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+        .settings-menu-item { display: flex; align-items: center; gap: 9px; padding: 11px 14px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 1px solid var(--border2); transition: all 0.15s; }
+        .settings-menu-item:last-child { border-bottom: none; }
+        .settings-menu-item:hover  { background: #141414; color: var(--light); }
+        .settings-menu-item.active { background: #13183a; color: #6677ff; }
+        .settings-panel { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 22px; }
+        .settings-section { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border2); }
+        .settings-section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .settings-section-title { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 14px; }
+        .settings-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .settings-row:last-child { margin-bottom: 0; }
+        .settings-label { font-size: 13px; font-weight: 500; color: var(--light); }
+        .settings-sub   { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+        .settings-input { background: #0e0e0e; border: 1px solid var(--border); border-radius: 7px; padding: 8px 12px; font-size: 13px; color: var(--light); font-family: inherit; outline: none; width: 220px; transition: border-color 0.15s; }
+        .settings-input:focus { border-color: #2a3380; }
+        .settings-toggle { width: 36px; height: 20px; border-radius: 999px; background: var(--blue); position: relative; cursor: pointer; flex-shrink: 0; }
+        .settings-toggle::after { content: ''; position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: right 0.2s; }
+        .settings-toggle.off { background: #222; }
+        .settings-toggle.off::after { right: auto; left: 2px; }
+        .save-btn { padding: 9px 20px; background: var(--blue); color: #fff; font-size: 13px; font-weight: 600; border-radius: 7px; border: none; cursor: pointer; transition: all 0.15s; }
+        .save-btn:hover { background: var(--blue-s); }
+
+        @media (max-width: 1100px) {
+            .stats-grid { grid-template-columns: repeat(2,1fr); }
+            .two-col    { grid-template-columns: 1fr; }
+            .video-grid { grid-template-columns: repeat(2,1fr); }
+            .create-layout { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main    { margin-left: 0; }
+            .page    { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <img src="https://framerusercontent.com/images/ug8zZiGfm3VpXw3P4uz37Ask.png" alt="CASHORA">
+    </div>
+    <nav class="sidebar-nav">
+        <button class="nav-item active" onclick="showPage('dashboard', this)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+            Dashboard
+        </button>
+        <button class="nav-item" onclick="showPage('create', this)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Create
+        </button>
+        <button class="nav-item" onclick="showPage('library', this)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+            Library
+        </button>
+        <button class="nav-item" onclick="showPage('distribution', this)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Distribution
+        </button>
+        <button class="nav-item" onclick="showPage('analytics', this)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Analytics
+        </button>
+        <button class="nav-item" onclick="showPage('settings', this)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            Settings
+        </button>
+    </nav>
+    <div class="sidebar-bottom">
+        <div class="sidebar-user">
+            <div class="s-avatar" id="sidebarAvatar">D</div>
+            <div class="s-user-info">
+                <div class="s-user-name" id="sidebarName">Demo User</div>
+                <div class="s-user-sub"  id="sidebarEmail">demo@cashora.tech</div>
+            </div>
+        </div>
+        <a class="signout-btn" href="http://127.0.0.1:4000/auth/logout">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign out
+        </a>
+    </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+    <div class="topbar">
+        <div class="topbar-title" id="topTitle">Dashboard</div>
+        <div class="topbar-right">
+            <div style="display:flex;align-items:center;gap:6px;padding:5px 11px;border-radius:7px;border:1px solid var(--border);font-size:12px;color:var(--muted);">
+                <div class="status-dot"></div>Online
+            </div>
+            <a class="topbar-link" href="/index.html">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Main site
+            </a>
+            <div class="topbar-user">
+                <div class="t-avatar" id="topAvatar"><span id="topInitial">D</span></div>
+                <span class="t-name" id="topName">Demo User</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ PAGE: DASHBOARD ══════════════ -->
+    <div class="page active" id="page-dashboard">
+        <div class="cta-banner">
+            <div class="cta-text">
+                <h2>Create New Content</h2>
+                <p>Describe your product or idea — Cashora generates ready-to-publish videos and visuals for every platform instantly.</p>
+            </div>
+            <button class="cta-btn" onclick="showPage('create', document.querySelectorAll('.nav-item')[1])">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Start creating
+            </button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-row">
+                    <span class="stat-label">Videos Generated</span>
+                    <div class="stat-icon" style="background:#141414;border:1px solid var(--border);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+                </div>
+                <div class="stat-value">247</div>
+                <div class="stat-change up">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+32%<span class="c-sub">this month</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-row">
+                    <span class="stat-label">Posts Published</span>
+                    <div class="stat-icon" style="background:#141414;border:1px solid var(--border);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div>
+                </div>
+                <div class="stat-value">184</div>
+                <div class="stat-change up">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+21%<span class="c-sub">this month</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-row">
+                    <span class="stat-label">Total Reach</span>
+                    <div class="stat-icon" style="background:#141414;border:1px solid var(--border);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+                </div>
+                <div class="stat-value">47,382</div>
+                <div class="stat-change up">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+12%<span class="c-sub">this month</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-row">
+                    <span class="stat-label">Engagement</span>
+                    <div class="stat-icon" style="background:#141414;border:1px solid var(--border);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+                </div>
+                <div class="stat-value">4.2%</div>
+                <div class="stat-change down">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>-0.3%<span class="c-sub">this month</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <div class="panel">
+                <div class="panel-header">
+                    <div><div class="panel-title">Recent Activity</div><div class="panel-sub">Last 3 generated items</div></div>
+                    <a class="panel-link" href="#" onclick="showPage('library', document.querySelectorAll('.nav-item')[2]);return false;">View all</a>
+                </div>
+                <div class="activity-list">
+                    <div class="act-item">
+                        <div class="act-icon" style="background:#101827;border-color:#1e2d40;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a7fa5" stroke-width="1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+                        <div class="act-body"><div class="act-name">5 AI Tools Every Marketer Needs in 2026</div><div class="act-desc">YouTube Short + Instagram Reel — auto-posted to 3 platforms</div></div>
+                        <div class="act-right"><div class="act-time">2 min ago</div><span class="badge green">Published</span></div>
+                    </div>
+                    <div class="act-item">
+                        <div class="act-icon" style="background:#120d1e;border-color:#221840;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b4fa8" stroke-width="1.8"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+                        <div class="act-body"><div class="act-name">How to Turn Your Idea Into Income</div><div class="act-desc">TikTok video — 14.2K views in first hour</div></div>
+                        <div class="act-right"><div class="act-time">1 hr ago</div><span class="badge blue">Trending</span></div>
+                    </div>
+                    <div class="act-item">
+                        <div class="act-icon" style="background:#0e1d13;border-color:#1a3322;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a8c5c" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+                        <div class="act-body"><div class="act-name">Prompt-to-Profit: Beginner's Guide</div><div class="act-desc">Long-form YouTube — Rs. 4,800 AdSense earned</div></div>
+                        <div class="act-right"><div class="act-time">5 hr ago</div><span class="badge green">+Rs. 4.8K</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><div><div class="panel-title">Quick Actions</div><div class="panel-sub">Jump straight in</div></div></div>
+                <div class="quick-actions">
+                    <button class="q-btn" onclick="showPage('create', document.querySelectorAll('.nav-item')[1])"><div class="q-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div class="q-text"><div class="q-label">Generate video</div><div class="q-desc">Describe it, AI builds it</div></div><span class="q-arrow">›</span></button>
+                    <button class="q-btn" onclick="showPage('distribution', document.querySelectorAll('.nav-item')[3])"><div class="q-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div><div class="q-text"><div class="q-label">Auto distribute</div><div class="q-desc">Push to all platforms</div></div><span class="q-arrow">›</span></button>
+                    <button class="q-btn" onclick="showPage('analytics', document.querySelectorAll('.nav-item')[4])"><div class="q-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="q-text"><div class="q-label">View analytics</div><div class="q-desc">Reach, views, revenue</div></div><span class="q-arrow">›</span></button>
+                    <button class="q-btn" onclick="showPage('library', document.querySelectorAll('.nav-item')[2])"><div class="q-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></div><div class="q-text"><div class="q-label">Content library</div><div class="q-desc">Browse your videos</div></div><span class="q-arrow">›</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ PAGE: CREATE ══════════════ -->
+    <div class="page" id="page-create">
+        <div class="page-title">Create Content</div>
+        <div class="page-sub">Generate from a prompt, or upload your own footage to enhance and distribute</div>
+
+        <div class="create-layout">
+            <div>
+                <!-- Mode tabs -->
+                <div style="display:flex;gap:0;margin-bottom:16px;border:1px solid var(--border);border-radius:9px;overflow:hidden;width:fit-content;">
+                    <button id="tabPrompt" onclick="switchCreateTab('prompt')" style="padding:8px 18px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:#13183a;color:#6677ff;transition:all .15s;">AI Video from Text</button>
+                    <button id="tabUpload" onclick="switchCreateTab('upload')" style="padding:8px 18px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;">Upload Video</button>
+                    <button id="tabImage" onclick="switchCreateTab('image')" style="padding:8px 18px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;">Create Image</button>
+                </div>
+
+                <!-- Main form -->
+                <div class="panel" id="createForm">
+
+                    <!-- Prompt tab -->
+                    <div id="createPromptTab">
+                        <div class="form-group">
+                            <label class="form-label">Your Prompt</label>
+                            <div class="prompt-wrap">
+                                <textarea class="prompt-input" id="promptInput" placeholder="e.g. A short video explaining how our AI tool helps content creators save 10 hours a week by automating video creation and posting..." oninput="updateCount(this)"></textarea>
+                                <span class="prompt-count" id="promptCount">0 / 500</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload tab -->
+                    <div id="createUploadTab" style="display:none;">
+                        <div class="form-group">
+                            <label class="form-label">Upload Video</label>
+                            <div id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.style.borderColor='#3344ff'" ondragleave="this.style.borderColor='var(--border)'" ondrop="handleDrop(event)"
+                                style="border:1.5px dashed var(--border);border-radius:10px;padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .2s;background:#0e0e0e;">
+                                <input type="file" id="fileInput" accept="video/mp4,video/*" style="display:none;" onchange="handleFileSelect(this)">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5" style="margin:0 auto 10px;display:block;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <div style="font-size:13.5px;font-weight:600;color:var(--light);margin-bottom:4px;">Drop your video here</div>
+                                <div style="font-size:12px;color:var(--muted);">or click to browse — MP4, MOV, AVI up to 2GB</div>
+                            </div>
+                            <div id="filePreview" style="display:none;margin-top:10px;padding:12px 14px;background:#141414;border:1px solid var(--border);border-radius:8px;display:none;align-items:center;gap:10px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a7fa5" stroke-width="1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                                <span id="fileName" style="font-size:13px;color:var(--light);flex:1;"></span>
+                                <span id="fileSize" style="font-size:11px;color:var(--muted);"></span>
+                                <button onclick="clearFile()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;">×</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Enhancement Options</label>
+                            <div style="display:flex;flex-direction:column;gap:8px;">
+                                <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;color:var(--light);">
+                                    <input type="checkbox" checked style="accent-color:var(--blue);width:14px;height:14px;"> Add AI voiceover
+                                </label>
+                                <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;color:var(--light);">
+                                    <input type="checkbox" checked style="accent-color:var(--blue);width:14px;height:14px;"> Auto-generate captions
+                                </label>
+                                <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;color:var(--light);">
+                                    <input type="checkbox" style="accent-color:var(--blue);width:14px;height:14px;"> Create platform variants (Reel, Short, etc.)
+                                </label>
+                                <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;color:var(--light);">
+                                    <input type="checkbox" style="accent-color:var(--blue);width:14px;height:14px;"> AI thumbnail generation
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upload tab -->
+                    <div id="createUploadTab" style="display:none;">
+                        <div class="form-group">
+                            <label class="form-label">Upload Video</label>
+                            <div id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.style.borderColor='#3344ff'" ondragleave="this.style.borderColor='var(--border)'" ondrop="handleDrop(event)"
+                                style="border:1.5px dashed var(--border);border-radius:10px;padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .2s;background:#0e0e0e;">
+                                <input type="file" id="fileInput" accept="video/mp4,video/*" style="display:none;" onchange="handleFileSelect(this)">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5" style="margin:0 auto 10px;display:block;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <div style="font-size:13.5px;font-weight:600;color:var(--light);margin-bottom:4px;">Drop your video here</div>
+                                <div style="font-size:12px;color:var(--muted);">or click to browse — MP4, MOV, AVI up to 2GB</div>
+                            </div>
+                            <div id="filePreview" style="display:none;margin-top:10px;padding:12px 14px;background:#141414;border:1px solid var(--border);border-radius:8px;display:none;align-items:center;gap:10px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a7fa5" stroke-width="1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                                <span id="fileName" style="font-size:13px;color:var(--light);flex:1;"></span>
+                                <span id="fileSize" style="font-size:11px;color:var(--muted);"></span>
+                                <button onclick="clearFile()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;">×</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Enhancement Options</label>
+                            <div style="display:flex;flex-direction:column;gap:8px;">
+                                <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;color:var(--light);">
+                                    <input type="checkbox" checked style="accent-color:var(--blue);width:14px;height:14px;"> Add AI voiceover
+                                </label>
+                                <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;color:var(--light);">
+                                    <input type="checkbox" checked style="accent-color:var(--blue);width:14px;height:14px;"> Auto-generate captions
+                                </label>
+                                <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;color:var(--light);">
+                                    <input type="checkbox" style="accent-color:var(--blue);width:14px;height:14px;"> Create platform variants (Reel, Short, etc.)
+                                </label>
+                                <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;color:var(--light);">
+                                    <input type="checkbox" style="accent-color:var(--blue);width:14px;height:14px;"> AI thumbnail generation
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image tab -->
+                    <div id="createImageTab" style="display:none;">
+                        <!-- Sub-tabs for upload vs generate -->
+                        <div style="display:flex;gap:8px;margin-bottom:16px;">
+                            <button id="imgTabUpload" onclick="switchImageMode('upload')" style="flex:1;padding:10px;font-size:13px;font-weight:600;border:1px solid var(--border);border-radius:7px;cursor:pointer;background:#13183a;color:#6677ff;transition:all .15s;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                Upload Image
+                            </button>
+                            <button id="imgTabGenerate" onclick="switchImageMode('generate')" style="flex:1;padding:10px;font-size:13px;font-weight:600;border:1px solid var(--border);border-radius:7px;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                                Generate with AI
+                            </button>
+                        </div>
+
+                        <!-- Upload Image Mode -->
+                        <div id="imgUploadMode">
+                            <div class="form-group">
+                                <label class="form-label">Upload Image</label>
+                                <div id="imgDropZone" onclick="document.getElementById('imgFileInput').click()" ondragover="event.preventDefault();this.style.borderColor='#3344ff'" ondragleave="this.style.borderColor='var(--border)'" ondrop="handleImgDrop(event)"
+                                    style="border:1.5px dashed var(--border);border-radius:10px;padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .2s;background:#0e0e0e;">
+                                    <input type="file" id="imgFileInput" accept="image/*" style="display:none;" onchange="handleImgFileSelect(this)">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5" style="margin:0 auto 10px;display:block;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                    <div style="font-size:13.5px;font-weight:600;color:var(--light);margin-bottom:4px;">Drop your image here</div>
+                                    <div style="font-size:12px;color:var(--muted);">or click to browse — JPG, PNG, WebP up to 10MB</div>
+                                </div>
+                                <div id="imgPreview" style="display:none;margin-top:10px;padding:12px 14px;background:#141414;border:1px solid var(--border);border-radius:8px;align-items:center;gap:10px;">
+                                    <img id="imgPreviewThumb" style="width:48px;height:48px;object-fit:cover;border-radius:6px;display:none;">
+                                    <div style="flex:1;">
+                                        <div id="imgFileName" style="font-size:13px;color:var(--light);"></div>
+                                        <div id="imgFileSize" style="font-size:11px;color:var(--muted);margin-top:2px;"></div>
+                                    </div>
+                                    <button onclick="clearImgFile()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;">×</button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Image Enhancements</label>
+                                <div style="display:flex;flex-direction:column;gap:8px;">
+                                    <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;color:var(--light);">
+                                        <input type="checkbox" style="accent-color:var(--blue);width:14px;height:14px;"> AI background removal
+                                    </label>
+                                    <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;color:var(--light);">
+                                        <input type="checkbox" style="accent-color:var(--blue);width:14px;height:14px;"> Auto color correction
+                                    </label>
+                                    <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;color:var(--light);">
+                                        <input type="checkbox" style="accent-color:var(--blue);width:14px;height:14px;"> Generate caption text
+                                    </label>
+                                    <label style="display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--border);border-radius:7px;cursor:pointer;font-size:13px;color:var(--light);">
+                                        <input type="checkbox" checked style="accent-color:var(--blue);width:14px;height:14px;"> Resize for all platforms
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Generate Image Mode -->
+                        <div id="imgGenerateMode" style="display:none;">
+                            <div class="form-group">
+                                <label class="form-label">Image Description Prompt</label>
+                                <div class="prompt-wrap">
+                                    <textarea class="prompt-input" id="imgPromptInput" placeholder="e.g. A futuristic city skyline at sunset with flying cars, neon lights, and holographic billboards. Cyberpunk aesthetic, highly detailed..." style="min-height:120px;" oninput="updateImgCount(this)"></textarea>
+                                    <span class="prompt-count" id="imgPromptCount">0 / 500</span>
+                                </div>
+                            </div>
+                            <div class="toggle-row">
+                                <div class="form-group" style="margin-bottom:0">
+                                    <label class="form-label">Art Style</label>
+                                    <select class="select-input" id="imgStyle">
+                                        <option>Photorealistic</option>
+                                        <option>Digital Art</option>
+                                        <option>Oil Painting</option>
+                                        <option>Watercolor</option>
+                                        <option>Anime / Manga</option>
+                                        <option>3D Render</option>
+                                        <option>Sketch / Line Art</option>
+                                        <option>Pixel Art</option>
+                                        <option>Abstract</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin-bottom:0">
+                                    <label class="form-label">Aspect Ratio</label>
+                                    <select class="select-input" id="imgRatio">
+                                        <option>1:1 (Square)</option>
+                                        <option>16:9 (Landscape)</option>
+                                        <option>9:16 (Portrait)</option>
+                                        <option>4:3 (Standard)</option>
+                                        <option>21:9 (Ultrawide)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Quality & Detail</label>
+                                <select class="select-input" id="imgQuality">
+                                    <option>Standard (Fast)</option>
+                                    <option>High Quality</option>
+                                    <option>Ultra HD (Slower)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Common sections for all tabs -->
+                    <div id="videoOptions">
+                        <!-- Platforms -->
+                        <div class="form-group">
+                            <label class="form-label">Platforms</label>
+                            <div class="platform-grid" id="platformGrid">
+                                <div class="platform-toggle selected" onclick="togglePlatform(this)">
+                                    <div class="pt-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+                                    <span class="pt-name">YouTube</span>
+                                </div>
+                                <div class="platform-toggle selected" onclick="togglePlatform(this)">
+                                    <div class="pt-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></div>
+                                    <span class="pt-name">Instagram</span>
+                                </div>
+                                <div class="platform-toggle" onclick="togglePlatform(this)">
+                                    <div class="pt-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div>
+                                    <span class="pt-name">LinkedIn</span>
+                                </div>
+                                <div class="platform-toggle" onclick="togglePlatform(this)">
+                                    <div class="pt-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.622z"/></svg></div>
+                                    <span class="pt-name">Twitter / X</span>
+                                </div>
+                                <div class="platform-toggle selected" onclick="togglePlatform(this)">
+                                    <div class="pt-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.22 8.22 0 004.87 1.6V6.84a4.85 4.85 0 01-1.1-.15z"/></svg></div>
+                                    <span class="pt-name">TikTok</span>
+                                </div>
+                                <div class="platform-toggle" onclick="togglePlatform(this)">
+                                    <div class="pt-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+                                    <span class="pt-name">Web Embed</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="toggle-row">
+                            <div class="form-group" style="margin-bottom:0">
+                                <label class="form-label">Aspect Ratio</label>
+                                <select class="select-input">
+                                    <option>Auto (Platform Optimized)</option>
+                                    <option>16:9 (Landscape)</option>
+                                    <option>9:16 (Portrait)</option>
+                                    <option>1:1 (Square)</option>
+                                    <option>4:5 (Vertical)</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0">
+                                <label class="form-label">Tone / Style</label>
+                                <select class="select-input">
+                                    <option>Professional</option>
+                                    <option>Casual & Fun</option>
+                                    <option>Educational</option>
+                                    <option>Storytelling</option>
+                                    <option>Promotional</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Video Length</label>
+                            <select class="select-input">
+                                <option>Short (15–30s)</option>
+                                <option>Medium (60–90s)</option>
+                                <option>Long (3–5 min)</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-top:20px;">
+                            <button class="generate-btn" id="generateBtn" onclick="startGenerate()">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                <span id="generateBtnText">Generate Video</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Image-specific generate button -->
+                    <div id="imageOptions" style="display:none;">
+                        <div class="form-group">
+                            <label class="form-label">Output Platforms</label>
+                            <div class="platform-grid">
+                                <div class="platform-toggle selected" onclick="togglePlatform(this)">
+                                    <div class="pt-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/></svg></div>
+                                    <span class="pt-name">Instagram</span>
+                                </div>
+                                <div class="platform-toggle selected" onclick="togglePlatform(this)">
+                                    <div class="pt-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.622z"/></svg></div>
+                                    <span class="pt-name">Twitter / X</span>
+                                </div>
+                                <div class="platform-toggle" onclick="togglePlatform(this)">
+                                    <div class="pt-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="1.8"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div>
+                                    <span class="pt-name">LinkedIn</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:20px;">
+                            <button class="generate-btn" id="generateImgBtn" onclick="startGenerate()">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                <span id="generateImgBtnText">Generate Image</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress panel -->
+                <div class="panel progress-panel" id="progressPanel">
+                    <div style="margin-bottom:18px;">
+                        <div style="font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px;">Generating your content</div>
+                        <div style="font-size:13px;color:var(--muted);" id="progressTitle">Starting pipeline...</div>
+                    </div>
+
+                    <div class="stepper" id="stepper">
+                        <div class="step active" id="step-script"><div class="step-circle">1</div><div class="step-label">Script</div></div>
+                        <div class="step-line" id="line-1"></div>
+                        <div class="step" id="step-assets"><div class="step-circle">2</div><div class="step-label">Assets</div></div>
+                        <div class="step-line" id="line-2"></div>
+                        <div class="step" id="step-voice"><div class="step-circle">3</div><div class="step-label">Voice</div></div>
+                        <div class="step-line" id="line-3"></div>
+                        <div class="step" id="step-render"><div class="step-circle">4</div><div class="step-label">Render</div></div>
+                        <div class="step-line" id="line-4"></div>
+                        <div class="step" id="step-done-step"><div class="step-circle">5</div><div class="step-label">Done</div></div>
+                    </div>
+
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:5%"></div></div>
+
+                    <div class="step-status" id="stepStatus">
+                        <div class="step-spinner"></div>
+                        <div><div class="step-status-text" id="stepStatusText">Generating script...</div><div class="step-status-sub" id="stepStatusSub">Analysing your prompt and building narrative structure</div></div>
+                    </div>
+                </div>
+
+                <!-- Done card -->
+                <div class="done-card" id="doneCard">
+                    <h3>Content Ready</h3>
+                    <p>Your video has been generated and is ready to publish to your selected platforms.</p>
+                    <div class="done-actions">
+                        <button class="done-btn primary" onclick="showPage('library', document.querySelectorAll('.nav-item')[2])">View in Library</button>
+                        <button class="done-btn secondary" onclick="resetCreate()">Create Another</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side tips -->
+            <div class="create-side">
+                <div class="tip-card">
+                    <h4>Content Creation Tips</h4>
+                    <div class="tip-item"><div class="tip-dot"></div>Be specific in your prompts for better results</div>
+                    <div class="tip-item"><div class="tip-dot"></div>Mention your target audience clearly</div>
+                    <div class="tip-item"><div class="tip-dot"></div>Keep video prompts under 3 sentences</div>
+                    <div class="tip-item"><div class="tip-dot"></div>For images, describe composition and mood</div>
+                </div>
+                <div class="tip-card">
+                    <h4>What we generate</h4>
+                    <div class="tip-item"><div class="tip-dot"></div>AI videos with voiceover & script</div>
+                    <div class="tip-item"><div class="tip-dot"></div>Platform-optimized visuals</div>
+                    <div class="tip-item"><div class="tip-dot"></div>Captions and subtitles</div>
+                    <div class="tip-item"><div class="tip-dot"></div>High-quality AI images</div>
+                    <div class="tip-item"><div class="tip-dot"></div>Multi-platform variants</div>
+                </div>
+                <div class="tip-card" style="background:#0e1024;border-color:#1e2450;">
+                    <h4 style="color:#6677ff;">Pro tip</h4>
+                    <div class="tip-item" style="color:#8a8a8a;">Upload your own content for AI-powered enhancements like background removal, captions, and auto-resizing for all platforms.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ PAGE: LIBRARY ══════════════ -->
+    <div class="page" id="page-library">
+        <div class="page-title">Content Library</div>
+        <div class="page-sub">All your generated videos and content</div>
+
+        <div class="lib-toolbar">
+            <div class="lib-filters">
+                <button class="filter-btn active" onclick="filterLib(this,'all')">All</button>
+                <button class="filter-btn" onclick="filterLib(this,'published')">Published</button>
+                <button class="filter-btn" onclick="filterLib(this,'rendering')">Rendering</button>
+                <button class="filter-btn" onclick="filterLib(this,'draft')">Draft</button>
+            </div>
+            <button class="lib-new-btn" onclick="showPage('create', document.querySelectorAll('.nav-item')[1])">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                New content
+            </button>
+        </div>
+
+        <div class="video-grid">
+            <!-- Card 1 -->
+            <div class="video-card">
+                <div class="video-thumb" style="background:linear-gradient(135deg,#0e1024,#13183a);">
+                    <div class="thumb-play"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+                </div>
+                <div class="video-body">
+                    <div class="video-title">5 AI Tools Every Marketer Needs in 2026</div>
+                    <div class="video-meta">
+                        <span class="video-date">Aug 27, 2026</span>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <span class="badge green">Published</span>
+                            <div class="platform-icons">
+                                <div class="p-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4a7fa5" stroke-width="1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+                                <div class="p-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/></svg></div>
+                                <div class="p-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#e94057" stroke-width="1.8"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.77-.39 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.22 8.22 0 004.87 1.6V6.84a4.85 4.85 0 01-1.1-.15z"/></svg></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="video-actions">
+                        <button class="v-btn"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
+                        <button class="v-btn publish"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Republish</button>
+                        <button class="v-btn del"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg> Delete</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="video-card">
+                <div class="video-thumb" style="background:linear-gradient(135deg,#1a0820,#2d0a3a);">
+                    <div class="thumb-play"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+                </div>
+                <div class="video-body">
+                    <div class="video-title">How to Turn Your Idea Into Income</div>
+                    <div class="video-meta">
+                        <span class="video-date">Aug 27, 2026</span>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <span class="badge blue">Trending</span>
+                            <div class="platform-icons">
+                                <div class="p-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#e94057" stroke-width="1.8"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.77-.39 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.22 8.22 0 004.87 1.6V6.84a4.85 4.85 0 01-1.1-.15z"/></svg></div>
+                                <div class="p-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/></svg></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="video-actions">
+                        <button class="v-btn"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
+                        <button class="v-btn publish"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Publish</button>
+                        <button class="v-btn del"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg> Delete</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="video-card">
+                <div class="video-thumb" style="background:linear-gradient(135deg,#0a1a0e,#122010);">
+                    <div class="thumb-play"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+                </div>
+                <div class="video-body">
+                    <div class="video-title">Prompt-to-Profit: Beginner's Guide</div>
+                    <div class="video-meta">
+                        <span class="video-date">Aug 26, 2026</span>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <span class="badge green">Published</span>
+                            <div class="platform-icons">
+                                <div class="p-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4a7fa5" stroke-width="1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="video-actions">
+                        <button class="v-btn"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
+                        <button class="v-btn publish"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Republish</button>
+                        <button class="v-btn del"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg> Delete</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4 - Rendering -->
+            <div class="video-card">
+                <div class="video-thumb" style="background:linear-gradient(135deg,#1a1208,#2a1e08);">
+                    <div class="thumb-play" style="opacity:0.4;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+                    <div style="position:absolute;bottom:8px;left:8px;"><span class="badge amber">Rendering 64%</span></div>
+                </div>
+                <div class="video-body">
+                    <div class="video-title">3 Mistakes Every New Creator Makes</div>
+                    <div class="video-meta">
+                        <span class="video-date">Aug 27, 2026</span>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <span class="badge amber">Rendering</span>
+                        </div>
+                    </div>
+                    <div class="video-actions">
+                        <button class="v-btn" disabled style="opacity:0.4;cursor:not-allowed;">Edit</button>
+                        <button class="v-btn" disabled style="opacity:0.4;cursor:not-allowed;">Publish</button>
+                        <button class="v-btn del"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg> Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5 - Draft -->
+            <div class="video-card">
+                <div class="video-thumb" style="background:#0e0e0e;">
+                    <div class="thumb-play" style="opacity:0.3;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+                </div>
+                <div class="video-body">
+                    <div class="video-title">Why Cashora is Different from Other AI Tools</div>
+                    <div class="video-meta">
+                        <span class="video-date">Aug 25, 2026</span>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <span class="badge muted">Draft</span>
+                        </div>
+                    </div>
+                    <div class="video-actions">
+                        <button class="v-btn"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
+                        <button class="v-btn publish"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Publish</button>
+                        <button class="v-btn del"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg> Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ PAGE: DISTRIBUTION ══════════════ -->
+    <div class="page" id="page-distribution">
+        <div class="page-title">Distribution</div>
+        <div class="page-sub">Manage connected platforms and scheduled posts</div>
+        <div class="dist-grid">
+            <div class="dist-card">
+                <div class="dist-card-header"><div class="dist-card-title">Connected Platforms</div><button class="lib-new-btn" style="font-size:12px;padding:6px 12px;">+ Add</button></div>
+                <div class="conn-list">
+                    <div class="conn-item"><div class="conn-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a7fa5" stroke-width="1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><div class="conn-info"><div class="conn-name">YouTube</div><div class="conn-handle">@cashora.tech</div></div><div class="conn-toggle"></div></div>
+                    <div class="conn-item"><div class="conn-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#9b59b6"/></svg></div><div class="conn-info"><div class="conn-name">Instagram</div><div class="conn-handle">@cashora</div></div><div class="conn-toggle"></div></div>
+                    <div class="conn-item"><div class="conn-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e94057" stroke-width="1.8"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.77-.39 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.22 8.22 0 004.87 1.6V6.84a4.85 4.85 0 01-1.1-.15z"/></svg></div><div class="conn-info"><div class="conn-name">TikTok</div><div class="conn-handle">@cashora.ai</div></div><div class="conn-toggle"></div></div>
+                    <div class="conn-item"><div class="conn-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.8"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.622z"/></svg></div><div class="conn-info"><div class="conn-name">Twitter / X</div><div class="conn-handle">Not connected</div></div><div class="conn-toggle off"></div></div>
+                    <div class="conn-item"><div class="conn-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2867b2" stroke-width="1.8"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div><div class="conn-info"><div class="conn-name">LinkedIn</div><div class="conn-handle">Not connected</div></div><div class="conn-toggle off"></div></div>
+                </div>
+            </div>
+            <div class="dist-card">
+                <div class="dist-card-header"><div class="dist-card-title">Scheduled Posts</div><span class="badge blue">4 upcoming</span></div>
+                <div class="schedule-list">
+                    <div class="sched-item"><div class="sched-time">Today 6PM</div><div class="sched-body"><div class="sched-title">5 AI Tools Every Marketer Needs</div><div class="sched-plats">YouTube, Instagram, TikTok</div></div><span class="badge green">Ready</span></div>
+                    <div class="sched-item"><div class="sched-time">Tomorrow 9AM</div><div class="sched-body"><div class="sched-title">How to Turn Your Idea Into Income</div><div class="sched-plats">TikTok, Instagram</div></div><span class="badge amber">Rendering</span></div>
+                    <div class="sched-item"><div class="sched-time">Aug 29 12PM</div><div class="sched-body"><div class="sched-title">Prompt-to-Profit: Beginner's Guide</div><div class="sched-plats">YouTube</div></div><span class="badge green">Ready</span></div>
+                    <div class="sched-item"><div class="sched-time">Aug 30 8AM</div><div class="sched-body"><div class="sched-title">3 Mistakes New Creators Make</div><div class="sched-plats">All platforms</div></div><span class="badge muted">Draft</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ PAGE: ANALYTICS ══════════════ -->
+    <div class="page" id="page-analytics">
+        <div class="page-title">Analytics</div>
+        <div class="page-sub">Performance across all platforms this month</div>
+        
+        <!-- Overall stats -->
+        <div class="stats-grid" style="margin-bottom:24px;">
+            <div class="stat-card"><div class="stat-row"><span class="stat-label">Total Views</span></div><div class="stat-value">47,382</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+12%<span class="c-sub">vs last month</span></div></div>
+            <div class="stat-card"><div class="stat-row"><span class="stat-label">Watch Time</span></div><div class="stat-value">2,140 h</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+9%<span class="c-sub">vs last month</span></div></div>
+            <div class="stat-card"><div class="stat-row"><span class="stat-label">New Followers</span></div><div class="stat-value">+1,847</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+7%<span class="c-sub">vs last month</span></div></div>
+            <div class="stat-card"><div class="stat-row"><span class="stat-label">Revenue</span></div><div class="stat-value">Rs. 28,400</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+18%<span class="c-sub">vs last month</span></div></div>
+        </div>
+
+        <!-- Overall views chart - larger -->
+        <div class="chart-card" style="margin-bottom:24px;">
+            <div class="chart-title">Total Views Over Time</div>
+            <div class="chart-sub">Combined performance across all platforms — last 7 months</div>
+            <div id="overall-views-chart" style="height:200px;margin-top:16px;"></div>
+        </div>
+
+        <!-- Platform selector -->
+        <div style="margin-bottom:16px;">
+            <label class="form-label" style="margin-bottom:8px;">View Platform-Specific Analytics</label>
+            <select class="select-input" id="platformSelector" onchange="switchPlatform(this.value)" style="max-width:300px;">
+                <option value="youtube">YouTube</option>
+                <option value="instagram">Instagram</option>
+                <option value="tiktok">TikTok</option>
+                <option value="twitter">Twitter / X</option>
+            </select>
+        </div>
+
+        <!-- YouTube Analytics -->
+        <div class="platform-analytics" id="platform-youtube">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+                <div style="width:32px;height:32px;border-radius:7px;background:#141414;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a7fa5" stroke-width="1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                </div>
+                <div><div style="font-size:16px;font-weight:700;color:var(--white);">YouTube Analytics</div><div style="font-size:12px;color:var(--muted);">@cashora.tech</div></div>
+            </div>
+
+            <!-- YouTube stats row -->
+            <div class="stats-grid" style="margin-bottom:20px;">
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Views</span></div><div class="stat-value">21,400</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+14%</div></div>
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Watch Time</span></div><div class="stat-value">1,240 h</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+11%</div></div>
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Subscribers</span></div><div class="stat-value">+982</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+8%</div></div>
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Avg. CTR</span></div><div class="stat-value">5.3%</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+0.4pp</div></div>
+            </div>
+
+            <!-- YouTube charts -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+                <div class="chart-card">
+                    <div class="chart-title">Views by Day</div>
+                    <div class="chart-sub">Last 7 days</div>
+                    <div id="youtube-views-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Engagement Rate</div>
+                    <div class="chart-sub">Likes, comments, shares per view</div>
+                    <div id="youtube-engagement-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+                <div class="chart-card">
+                    <div class="chart-title">Subscriber Growth</div>
+                    <div class="chart-sub">New subscribers over time</div>
+                    <div id="youtube-subscribers-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Traffic Sources</div>
+                    <div class="chart-sub">Where viewers are coming from</div>
+                    <div id="youtube-traffic-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">Top Performing Videos</div>
+                <div class="chart-sub">This month on YouTube</div>
+                <div style="display:flex;flex-direction:column;gap:0;margin-top:12px;">
+                    <div style="display:grid;grid-template-columns:1fr 80px 70px 70px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);font-size:10.5px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.05em;">
+                        <span>Video Title</span><span style="text-align:right;">Views</span><span style="text-align:right;">Watch Time</span><span style="text-align:right;">CTR</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 80px 70px 70px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);align-items:center;">
+                        <span style="font-size:13px;color:var(--light);">5 AI Tools Every Marketer Needs</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--white);text-align:right;">12,400</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">680 h</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">5.9%</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 80px 70px 70px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);align-items:center;">
+                        <span style="font-size:13px;color:var(--light);">Prompt-to-Profit Guide</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--white);text-align:right;">6,200</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">380 h</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">4.2%</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 80px 70px 70px;gap:10px;padding:10px 0;align-items:center;">
+                        <span style="font-size:13px;color:var(--light);">3 Common Creator Mistakes</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--white);text-align:right;">2,800</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">180 h</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">3.8%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instagram Analytics -->
+        <div class="platform-analytics" id="platform-instagram" style="display:none;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+                <div style="width:32px;height:32px;border-radius:7px;background:#141414;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9b59b6" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="#9b59b6"/></svg>
+                </div>
+                <div><div style="font-size:16px;font-weight:700;color:var(--white);">Instagram Analytics</div><div style="font-size:12px;color:var(--muted);">@cashora</div></div>
+            </div>
+
+            <!-- Instagram stats row -->
+            <div class="stats-grid" style="margin-bottom:20px;">
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Reach</span></div><div class="stat-value">14,200</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+18%</div></div>
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Engagements</span></div><div class="stat-value">1,840</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+22%</div></div>
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Followers</span></div><div class="stat-value">+584</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+9%</div></div>
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Saves</span></div><div class="stat-value">420</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+15%</div></div>
+            </div>
+
+            <!-- Instagram charts -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+                <div class="chart-card">
+                    <div class="chart-title">Reach by Day</div>
+                    <div class="chart-sub">Last 7 days</div>
+                    <div id="instagram-reach-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Post Types Performance</div>
+                    <div class="chart-sub">Engagement by content type</div>
+                    <div id="instagram-post-types-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+                <div class="chart-card">
+                    <div class="chart-title">Engagement Rate Trend</div>
+                    <div class="chart-sub">Daily engagement rate</div>
+                    <div id="instagram-engagement-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Story vs Feed Performance</div>
+                    <div class="chart-sub">Impressions comparison</div>
+                    <div id="instagram-story-feed-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">Top Performing Posts</div>
+                <div class="chart-sub">This month on Instagram</div>
+                <div style="display:flex;flex-direction:column;gap:0;margin-top:12px;">
+                    <div style="display:grid;grid-template-columns:1fr 80px 80px 70px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);font-size:10.5px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.05em;">
+                        <span>Post</span><span style="text-align:right;">Reach</span><span style="text-align:right;">Likes</span><span style="text-align:right;">Saves</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 80px 80px 70px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);align-items:center;">
+                        <span style="font-size:13px;color:var(--light);">AI Tools for Marketers (Reel)</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--white);text-align:right;">8,400</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">1,120</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">280</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 80px 80px 70px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);align-items:center;">
+                        <span style="font-size:13px;color:var(--light);">Turn Ideas Into Income</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--white);text-align:right;">3,800</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">480</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">90</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 80px 80px 70px;gap:10px;padding:10px 0;align-items:center;">
+                        <span style="font-size:13px;color:var(--light);">Creator Mistakes Carousel</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--white);text-align:right;">2,000</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">240</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">50</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TikTok Analytics -->
+        <div class="platform-analytics" id="platform-tiktok" style="display:none;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+                <div style="width:32px;height:32px;border-radius:7px;background:#141414;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e94057" stroke-width="1.8"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.77-.39 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.22 8.22 0 004.87 1.6V6.84a4.85 4.85 0 01-1.1-.15z"/></svg>
+                </div>
+                <div><div style="font-size:16px;font-weight:700;color:var(--white);">TikTok Analytics</div><div style="font-size:12px;color:var(--muted);">@cashora.ai</div></div>
+            </div>
+
+            <!-- TikTok stats row -->
+            <div class="stats-grid" style="margin-bottom:20px;">
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Video Views</span></div><div class="stat-value">8,900</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+24%</div></div>
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Likes</span></div><div class="stat-value">1,340</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+19%</div></div>
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Shares</span></div><div class="stat-value">240</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+31%</div></div>
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Followers</span></div><div class="stat-value">+220</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+12%</div></div>
+            </div>
+
+            <!-- TikTok charts -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+                <div class="chart-card">
+                    <div class="chart-title">Views by Day</div>
+                    <div class="chart-sub">Last 7 days</div>
+                    <div id="tiktok-views-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Engagement Rate</div>
+                    <div class="chart-sub">Interactions per view</div>
+                    <div id="tiktok-engagement-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+                <div class="chart-card">
+                    <div class="chart-title">For You Page vs Following</div>
+                    <div class="chart-sub">Traffic source breakdown</div>
+                    <div id="tiktok-traffic-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Average Watch Time</div>
+                    <div class="chart-sub">Seconds per video</div>
+                    <div id="tiktok-watchtime-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">Top Performing Videos</div>
+                <div class="chart-sub">This month on TikTok</div>
+                <div style="display:flex;flex-direction:column;gap:0;margin-top:12px;">
+                    <div style="display:grid;grid-template-columns:1fr 80px 70px 70px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);font-size:10.5px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.05em;">
+                        <span>Video</span><span style="text-align:right;">Views</span><span style="text-align:right;">Likes</span><span style="text-align:right;">Shares</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 80px 70px 70px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);align-items:center;">
+                        <span style="font-size:13px;color:var(--light);">Turn Ideas Into Income</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--white);text-align:right;">5,200</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">840</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">180</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 80px 70px 70px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);align-items:center;">
+                        <span style="font-size:13px;color:var(--light);">AI Tools for Marketers</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--white);text-align:right;">2,400</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">320</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">40</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 80px 70px 70px;gap:10px;padding:10px 0;align-items:center;">
+                        <span style="font-size:13px;color:var(--light);">Creator Mistakes</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--white);text-align:right;">1,300</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">180</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">20</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Twitter/X Analytics -->
+        <div class="platform-analytics" id="platform-twitter" style="display:none;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+                <div style="width:32px;height:32px;border-radius:7px;background:#141414;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="1.8"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.622z"/></svg>
+                </div>
+                <div><div style="font-size:16px;font-weight:700;color:var(--white);">Twitter / X Analytics</div><div style="font-size:12px;color:var(--muted);">@cashora_tech</div></div>
+            </div>
+
+            <!-- Twitter stats row -->
+            <div class="stats-grid" style="margin-bottom:20px;">
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Impressions</span></div><div class="stat-value">2,882</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+6%</div></div>
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Engagements</span></div><div class="stat-value">184</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+8%</div></div>
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Retweets</span></div><div class="stat-value">42</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+12%</div></div>
+                <div class="stat-card"><div class="stat-row"><span class="stat-label">Followers</span></div><div class="stat-value">+61</div><div class="stat-change up"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>+4%</div></div>
+            </div>
+
+            <!-- Twitter charts -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+                <div class="chart-card">
+                    <div class="chart-title">Impressions by Day</div>
+                    <div class="chart-sub">Last 7 days</div>
+                    <div id="twitter-impressions-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Engagement Rate</div>
+                    <div class="chart-sub">Interactions per impression</div>
+                    <div id="twitter-engagement-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+                <div class="chart-card">
+                    <div class="chart-title">Tweet Types Performance</div>
+                    <div class="chart-sub">Avg. engagement by type</div>
+                    <div id="twitter-tweet-types-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Link Clicks vs Likes</div>
+                    <div class="chart-sub">Action comparison over time</div>
+                    <div id="twitter-actions-chart" style="height:140px;margin-top:12px;"></div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">Top Performing Posts</div>
+                <div class="chart-sub">This month on Twitter/X</div>
+                <div style="display:flex;flex-direction:column;gap:0;margin-top:12px;">
+                    <div style="display:grid;grid-template-columns:1fr 90px 70px 70px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);font-size:10.5px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.05em;">
+                        <span>Post</span><span style="text-align:right;">Impressions</span><span style="text-align:right;">Likes</span><span style="text-align:right;">Retweets</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 90px 70px 70px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);align-items:center;">
+                        <span style="font-size:13px;color:var(--light);">5 AI Tools Thread</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--white);text-align:right;">1,200</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">82</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">24</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 90px 70px 70px;gap:10px;padding:10px 0;border-bottom:1px solid var(--border2);align-items:center;">
+                        <span style="font-size:13px;color:var(--light);">Creator Mistakes Poll</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--white);text-align:right;">940</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">64</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">12</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 90px 70px 70px;gap:10px;padding:10px 0;align-items:center;">
+                        <span style="font-size:13px;color:var(--light);">Prompt Guide Link</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--white);text-align:right;">742</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">38</span>
+                        <span style="font-size:13px;color:var(--muted);text-align:right;">6</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ PAGE: SETTINGS ══════════════ -->
+    <div class="page" id="page-settings">
+        <div class="page-title">Settings</div>
+        <div class="page-sub">Manage your account and preferences</div>
+        <div class="settings-layout">
+            <div class="settings-menu">
+                <div class="settings-menu-item active">Profile</div>
+                <div class="settings-menu-item">Notifications</div>
+                <div class="settings-menu-item">Billing</div>
+                <div class="settings-menu-item">API Keys</div>
+            </div>
+            <div class="settings-panel">
+                <div class="settings-section">
+                    <div class="settings-section-title">Profile Information</div>
+                    <div class="settings-row"><div><div class="settings-label">Full name</div></div><input class="settings-input" id="settingsName" value="Demo User"></div>
+                    <div class="settings-row"><div><div class="settings-label">Email address</div></div><input class="settings-input" id="settingsEmail" value="demo@cashora.tech"></div>
+                    <div class="settings-row"><div><div class="settings-label">Username</div></div><input class="settings-input" value="@cashora"></div>
+                </div>
+                <div class="settings-section">
+                    <div class="settings-section-title">Preferences</div>
+                    <div class="settings-row"><div><div class="settings-label">Auto-publish after generation</div><div class="settings-sub">Publish immediately without review</div></div><div class="settings-toggle off" onclick="this.classList.toggle('off')"></div></div>
+                    <div class="settings-row"><div><div class="settings-label">Email notifications</div><div class="settings-sub">Get notified when videos are ready</div></div><div class="settings-toggle" onclick="this.classList.toggle('off')"></div></div>
+                    <div class="settings-row"><div><div class="settings-label">Weekly report</div><div class="settings-sub">Analytics summary every Monday</div></div><div class="settings-toggle" onclick="this.classList.toggle('off')"></div></div>
+                </div>
+                <button class="save-btn">Save changes</button>
+            </div>
+        </div>
+    </div>
+
+</div><!-- end .main -->
+
+<script>
+// ── Page navigation
+const pageTitles = { dashboard:'Dashboard', create:'Create', library:'Library', distribution:'Distribution', analytics:'Analytics', settings:'Settings' };
+
+function showPage(id, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    if (btn) btn.classList.add('active');
+    document.getElementById('topTitle').textContent = pageTitles[id] || 'Dashboard';
+    window.scrollTo(0,0);
+}
+
+// ── Platform toggles
+function togglePlatform(el) { el.classList.toggle('selected'); }
+
+// ── Prompt char count
+function updateCount(el) {
+    document.getElementById('promptCount').textContent = el.value.length + ' / 500';
+    if (el.value.length > 500) el.value = el.value.substring(0,500);
+}
+
+// ── Generate animation
+const steps = [
+    { label: 'Generating script...', sub: 'Analysing your prompt and building narrative structure', progress: 18 },
+    { label: 'Sourcing assets...', sub: 'Finding visuals, B-roll and background music', progress: 38 },
+    { label: 'Generating voiceover...', sub: 'Converting script to natural-sounding speech', progress: 60 },
+    { label: 'Rendering video...', sub: 'Compositing all elements into final output', progress: 82 },
+    { label: 'Finalising...', sub: 'Optimising for selected platforms', progress: 96 },
+];
+
+const stepIds = ['step-script','step-assets','step-voice','step-render','step-done-step'];
+const lineIds = ['line-1','line-2','line-3','line-4'];
+
+function startGenerate() {
+    const prompt = document.getElementById('promptInput').value.trim();
+    if (!prompt) { document.getElementById('promptInput').focus(); return; }
+
+    document.getElementById('generateBtn').disabled = true;
+    document.getElementById('createForm').style.display = 'none';
+    document.getElementById('progressPanel').classList.add('visible');
+    document.getElementById('doneCard').classList.remove('visible');
+
+    let current = 0;
+    runStep(current);
+
+    function runStep(i) {
+        if (i >= steps.length) { finish(); return; }
+        const s = steps[i];
+
+        // Update stepper
+        stepIds.forEach((sid, idx) => {
+            const el = document.getElementById(sid);
+            el.classList.remove('active','done');
+            if (idx < i) { el.classList.add('done'); el.querySelector('.step-circle').innerHTML = '✓'; }
+            else if (idx === i) { el.classList.add('active'); el.querySelector('.step-circle').textContent = idx+1; }
+            else { el.querySelector('.step-circle').textContent = idx+1; }
+        });
+
+        lineIds.forEach((lid, idx) => {
+            const el = document.getElementById(lid);
+            el.classList.remove('done','active');
+            if (idx < i) el.classList.add('done');
+            else if (idx === i) el.classList.add('active');
+        });
+
+        document.getElementById('stepStatusText').textContent = s.label;
+        document.getElementById('stepStatusSub').textContent  = s.sub;
+        document.getElementById('progressFill').style.width   = s.progress + '%';
+        document.getElementById('progressTitle').textContent  = 'Step ' + (i+1) + ' of ' + steps.length;
+
+        setTimeout(() => runStep(i + 1), 1800);
+    }
+
+    function finish() {
+        stepIds.forEach((sid,idx) => {
+            const el = document.getElementById(sid);
+            el.classList.remove('active'); el.classList.add('done');
+            el.querySelector('.step-circle').innerHTML = '✓';
+        });
+        lineIds.forEach(lid => { document.getElementById(lid).classList.remove('active'); document.getElementById(lid).classList.add('done'); });
+        document.getElementById('progressFill').style.width = '100%';
+        document.getElementById('progressPanel').classList.remove('visible');
+        document.getElementById('doneCard').classList.add('visible');
+    }
+}
+
+function resetCreate() {
+    document.getElementById('createForm').style.display = '';
+    document.getElementById('progressPanel').classList.remove('visible');
+    document.getElementById('doneCard').classList.remove('visible');
+    document.getElementById('generateBtn').disabled = false;
+    document.getElementById('promptInput').value = '';
+    document.getElementById('promptCount').textContent = '0 / 500';
+    document.getElementById('progressFill').style.width = '5%';
+    stepIds.forEach((sid,idx) => {
+        const el = document.getElementById(sid);
+        el.classList.remove('active','done');
+        el.querySelector('.step-circle').textContent = idx+1;
+    });
+    lineIds.forEach(lid => { const el = document.getElementById(lid); el.classList.remove('done','active'); });
+}
+
+// ── Library filter (visual only)
+function filterLib(btn, filter) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+// ── Platform analytics switcher
+function switchPlatform(platform) {
+    document.querySelectorAll('.platform-analytics').forEach(p => p.style.display = 'none');
+    document.getElementById('platform-' + platform).style.display = 'block';
+}
+
+// ── Create tab switching
+function switchCreateTab(mode) {
+    const promptTab = document.getElementById('createPromptTab');
+    const uploadTab = document.getElementById('createUploadTab');
+    const imageTab = document.getElementById('createImageTab');
+    const btnPrompt = document.getElementById('tabPrompt');
+    const btnUpload = document.getElementById('tabUpload');
+    const btnImage = document.getElementById('tabImage');
+    const videoOptions = document.getElementById('videoOptions');
+    const imageOptions = document.getElementById('imageOptions');
+    
+    // Hide all tabs
+    promptTab.style.display = 'none';
+    uploadTab.style.display = 'none';
+    imageTab.style.display = 'none';
+    
+    // Reset all button styles
+    btnPrompt.style.background = 'transparent';
+    btnPrompt.style.color = 'var(--muted)';
+    btnUpload.style.background = 'transparent';
+    btnUpload.style.color = 'var(--muted)';
+    btnImage.style.background = 'transparent';
+    btnImage.style.color = 'var(--muted)';
+    
+    // Show selected tab and highlight button
+    if (mode === 'prompt') {
+        promptTab.style.display = '';
+        btnPrompt.style.background = '#13183a';
+        btnPrompt.style.color = '#6677ff';
+        videoOptions.style.display = '';
+        imageOptions.style.display = 'none';
+    } else if (mode === 'upload') {
+        uploadTab.style.display = '';
+        btnUpload.style.background = '#13183a';
+        btnUpload.style.color = '#6677ff';
+        videoOptions.style.display = '';
+        imageOptions.style.display = 'none';
+    } else if (mode === 'image') {
+        imageTab.style.display = '';
+        btnImage.style.background = '#13183a';
+        btnImage.style.color = '#6677ff';
+        videoOptions.style.display = 'none';
+        imageOptions.style.display = '';
+    }
+}
+
+// ── Image mode switching (upload vs generate)
+function switchImageMode(mode) {
+    const uploadMode = document.getElementById('imgUploadMode');
+    const generateMode = document.getElementById('imgGenerateMode');
+    const btnUpload = document.getElementById('imgTabUpload');
+    const btnGenerate = document.getElementById('imgTabGenerate');
+    
+    if (mode === 'upload') {
+        uploadMode.style.display = '';
+        generateMode.style.display = 'none';
+        btnUpload.style.background = '#13183a';
+        btnUpload.style.color = '#6677ff';
+        btnGenerate.style.background = 'transparent';
+        btnGenerate.style.color = 'var(--muted)';
+    } else {
+        uploadMode.style.display = 'none';
+        generateMode.style.display = '';
+        btnGenerate.style.background = '#13183a';
+        btnGenerate.style.color = '#6677ff';
+        btnUpload.style.background = 'transparent';
+        btnUpload.style.color = 'var(--muted)';
+    }
+}
+
+// ── File upload handlers
+function handleDrop(e) {
+    e.preventDefault();
+    e.target.style.borderColor = 'var(--border)';
+    const files = e.dataTransfer.files;
+    if (files.length > 0) displayFile(files[0]);
+}
+
+function handleFileSelect(input) {
+    if (input.files.length > 0) displayFile(input.files[0]);
+}
+
+function displayFile(file) {
+    const preview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    
+    fileName.textContent = file.name;
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+    fileSize.textContent = sizeMB + ' MB';
+    preview.style.display = 'flex';
+}
+
+function clearFile() {
+    document.getElementById('fileInput').value = '';
+    document.getElementById('filePreview').style.display = 'none';
+}
+
+// ── Image file upload handlers
+function handleImgDrop(e) {
+    e.preventDefault();
+    e.target.style.borderColor = 'var(--border)';
+    const files = e.dataTransfer.files;
+    if (files.length > 0) displayImgFile(files[0]);
+}
+
+function handleImgFileSelect(input) {
+    if (input.files.length > 0) displayImgFile(input.files[0]);
+}
+
+function displayImgFile(file) {
+    const preview = document.getElementById('imgPreview');
+    const fileName = document.getElementById('imgFileName');
+    const fileSize = document.getElementById('imgFileSize');
+    const thumb = document.getElementById('imgPreviewThumb');
+    
+    fileName.textContent = file.name;
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+    fileSize.textContent = sizeMB + ' MB';
+    
+    // Show thumbnail preview
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        thumb.src = e.target.result;
+        thumb.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+    
+    preview.style.display = 'flex';
+}
+
+function clearImgFile() {
+    document.getElementById('imgFileInput').value = '';
+    document.getElementById('imgPreview').style.display = 'none';
+    document.getElementById('imgPreviewThumb').style.display = 'none';
+}
+
+// ── Image prompt counter
+function updateImgCount(el) {
+    document.getElementById('imgPromptCount').textContent = el.value.length + ' / 500';
+    if (el.value.length > 500) el.value = el.value.substring(0,500);
+}
+
+// ── Create tab switching
+function switchCreateTab(mode) {
+    if (mode === 'prompt') {
+        document.getElementById('tabPrompt').style.background = '#13183a';
+        document.getElementById('tabPrompt').style.color = '#6677ff';
+        document.getElementById('tabUpload').style.background = 'transparent';
+        document.getElementById('tabUpload').style.color = 'var(--muted)';
+        document.getElementById('createPromptTab').style.display = '';
+        document.getElementById('createUploadTab').style.display = 'none';
+    } else {
+        document.getElementById('tabPrompt').style.background = 'transparent';
+        document.getElementById('tabPrompt').style.color = 'var(--muted)';
+        document.getElementById('tabUpload').style.background = '#13183a';
+        document.getElementById('tabUpload').style.color = '#6677ff';
+        document.getElementById('createPromptTab').style.display = 'none';
+        document.getElementById('createUploadTab').style.display = '';
+    }
+}
+
+// ── Upload handlers
+function handleDrop(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const dropZone = event.currentTarget;
+    dropZone.style.borderColor = 'var(--border)';
+    
+    const files = event.dataTransfer.files;
+    if (files.length > 0 && files[0].type.startsWith('video/')) {
+        displayFile(files[0]);
+    }
+}
+
+function handleFileSelect(input) {
+    if (input.files && input.files[0]) {
+        displayFile(input.files[0]);
+    }
+}
+
+function displayFile(file) {
+    const preview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    
+    fileName.textContent = file.name;
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+    fileSize.textContent = sizeMB + ' MB';
+    
+    preview.style.display = 'flex';
+    document.getElementById('dropZone').style.display = 'none';
+}
+
+function clearFile() {
+    document.getElementById('filePreview').style.display = 'none';
+    document.getElementById('dropZone').style.display = '';
+    document.getElementById('fileInput').value = '';
+}
+
+// ── Auth
+const h = new Date().getHours();
+const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+
+fetch('http://127.0.0.1:4000/auth/user', { credentials: 'include' })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.loggedIn) { window.location.href = 'http://127.0.0.1:4000/login/'; return; }
+        const name = data.name || 'User';
+        const email = data.email || '';
+        const initial = name.charAt(0).toUpperCase();
+        const first = name.split(' ')[0];
+
+        document.getElementById('sidebarName').textContent  = name;
+        document.getElementById('sidebarEmail').textContent = email;
+        document.getElementById('topName').textContent      = name;
+        document.getElementById('topTitle').textContent     = greet + ', ' + first;
+        setTimeout(() => { document.getElementById('topTitle').textContent = 'Dashboard'; }, 3000);
+
+        const mkImg = (size, r) => {
+            const img = document.createElement('img');
+            img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1c2bff&color=fff&size=${size}`;
+            img.style.cssText = `width:100%;height:100%;object-fit:cover;border-radius:${r};`;
+            return img;
+        };
+
+        const sa = document.getElementById('sidebarAvatar');
+        sa.innerHTML = ''; sa.appendChild(mkImg(52,'6px'));
+
+        const ta = document.getElementById('topAvatar');
+        ta.innerHTML = ''; ta.appendChild(mkImg(40,'4px'));
+
+        if (document.getElementById('settingsName'))  document.getElementById('settingsName').value  = name;
+        if (document.getElementById('settingsEmail')) document.getElementById('settingsEmail').value = email;
+    })
+    .catch(() => { document.getElementById('topTitle').textContent = 'Dashboard'; });
+
+// ── Initialize charts when page loads
+window.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+});
+
+function initializeCharts() {
+    const { BarChart, Bar, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell, 
+            XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart } = Recharts;
+    
+    // Chart colors matching the dark theme
+    const colors = {
+        primary: '#3344ff',
+        youtube: '#4a7fa5',
+        instagram: '#9b59b6',
+        tiktok: '#e94057',
+        twitter: '#888888',
+        bg: '#0a0a0a',
+        text: '#d4d4d4',
+        muted: '#666666'
+    };
+
+    // Overall Views Chart
+    const overallData = [
+        { month: 'Feb', views: 18000 },
+        { month: 'Mar', views: 21000 },
+        { month: 'Apr', views: 26500 },
+        { month: 'May', views: 24200 },
+        { month: 'Jun', views: 32200 },
+        { month: 'Jul', views: 37400 },
+        { month: 'Aug', views: 47382 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(AreaChart, { data: overallData },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { dataKey: 'month', stroke: colors.muted, style: { fontSize: '12px' } }),
+                React.createElement(YAxis, { stroke: colors.muted, style: { fontSize: '12px' } }),
+                React.createElement(Tooltip, { 
+                    contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '8px', color: colors.text },
+                    labelStyle: { color: colors.text }
+                }),
+                React.createElement(Area, { type: 'monotone', dataKey: 'views', stroke: colors.primary, fill: colors.primary, fillOpacity: 0.3 })
+            )
+        ),
+        document.getElementById('overall-views-chart')
+    );
+
+    // YouTube Charts
+    const ytViewsData = [
+        { day: 'Mon', views: 2400 }, { day: 'Tue', views: 2200 }, { day: 'Wed', views: 2800 },
+        { day: 'Thu', views: 2600 }, { day: 'Fri', views: 3200 }, { day: 'Sat', views: 3500 }, { day: 'Sun', views: 3800 }
+    ];
+    
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(BarChart, { data: ytViewsData },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { dataKey: 'day', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Bar, { dataKey: 'views', fill: colors.youtube, radius: [4, 4, 0, 0] })
+            )
+        ),
+        document.getElementById('youtube-views-chart')
+    );
+
+    const ytEngagementData = [
+        { day: 'W1', rate: 4.2 }, { day: 'W2', rate: 4.4 }, { day: 'W3', rate: 4.6 },
+        { day: 'W4', rate: 4.3 }, { day: 'W5', rate: 4.8 }, { day: 'W6', rate: 4.9 }, { day: 'W7', rate: 4.8 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(AreaChart, { data: ytEngagementData },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { dataKey: 'day', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Area, { type: 'monotone', dataKey: 'rate', stroke: colors.youtube, fill: colors.youtube, fillOpacity: 0.4 })
+            )
+        ),
+        document.getElementById('youtube-engagement-chart')
+    );
+
+    const ytSubsData = [
+        { day: 'Mon', subs: 120 }, { day: 'Tue', subs: 135 }, { day: 'Wed', subs: 145 },
+        { day: 'Thu', subs: 138 }, { day: 'Fri', subs: 162 }, { day: 'Sat', subs: 148 }, { day: 'Sun', subs: 180 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(LineChart, { data: ytSubsData },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { dataKey: 'day', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Line, { type: 'monotone', dataKey: 'subs', stroke: colors.youtube, strokeWidth: 2, dot: { r: 4 } })
+            )
+        ),
+        document.getElementById('youtube-subscribers-chart')
+    );
+
+    const ytTrafficData = [
+        { source: 'Search', value: 42 },
+        { source: 'Suggested', value: 31 },
+        { source: 'Browse', value: 15 },
+        { source: 'External', value: 12 }
+    ];
+    const TRAFFIC_COLORS = ['#4a7fa5', '#5c8db5', '#7099bb', '#89a8c8'];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(PieChart, {},
+                React.createElement(Pie, { 
+                    data: ytTrafficData, 
+                    dataKey: 'value', 
+                    nameKey: 'source', 
+                    cx: '50%', 
+                    cy: '50%', 
+                    innerRadius: 35,
+                    outerRadius: 55,
+                    paddingAngle: 2
+                }, ytTrafficData.map((entry, index) => 
+                    React.createElement(Cell, { key: `cell-${index}`, fill: TRAFFIC_COLORS[index % TRAFFIC_COLORS.length] })
+                )),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px', fontSize: '12px' } })
+            )
+        ),
+        document.getElementById('youtube-traffic-chart')
+    );
+
+    // Instagram Charts
+    const igReachData = [
+        { day: 'Mon', reach: 1800 }, { day: 'Tue', reach: 2200 }, { day: 'Wed', reach: 2400 },
+        { day: 'Thu', reach: 2100 }, { day: 'Fri', reach: 2900 }, { day: 'Sat', reach: 3100 }, { day: 'Sun', reach: 3300 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(BarChart, { data: igReachData },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { dataKey: 'day', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Bar, { dataKey: 'reach', fill: colors.instagram, radius: [4, 4, 0, 0] })
+            )
+        ),
+        document.getElementById('instagram-reach-chart')
+    );
+
+    const igPostTypesData = [
+        { type: 'Reels', engagement: 920 },
+        { type: 'Carousel', engagement: 580 },
+        { type: 'Single', engagement: 340 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(BarChart, { data: igPostTypesData, layout: 'vertical' },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { type: 'number', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { type: 'category', dataKey: 'type', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Bar, { dataKey: 'engagement', fill: colors.instagram, radius: [0, 4, 4, 0] })
+            )
+        ),
+        document.getElementById('instagram-post-types-chart')
+    );
+
+    const igEngagementData = [
+        { day: 'Mon', rate: 11.2 }, { day: 'Tue', rate: 12.1 }, { day: 'Wed', rate: 11.8 },
+        { day: 'Thu', rate: 13.4 }, { day: 'Fri', rate: 12.9 }, { day: 'Sat', rate: 13.8 }, { day: 'Sun', rate: 13.6 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(LineChart, { data: igEngagementData },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { dataKey: 'day', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Line, { type: 'monotone', dataKey: 'rate', stroke: colors.instagram, strokeWidth: 2, dot: { r: 4 } })
+            )
+        ),
+        document.getElementById('instagram-engagement-chart')
+    );
+
+    const igStoryFeedData = [
+        { day: 'Mon', stories: 1200, feed: 1600 }, { day: 'Tue', stories: 1400, feed: 1800 },
+        { day: 'Wed', stories: 1500, feed: 1900 }, { day: 'Thu', stories: 1300, feed: 1700 },
+        { day: 'Fri', stories: 1800, feed: 2100 }, { day: 'Sat', stories: 1900, feed: 2200 },
+        { day: 'Sun', stories: 2000, feed: 2400 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(BarChart, { data: igStoryFeedData },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { dataKey: 'day', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Bar, { dataKey: 'stories', fill: '#7b68a8', radius: [4, 4, 0, 0] }),
+                React.createElement(Bar, { dataKey: 'feed', fill: colors.instagram, radius: [4, 4, 0, 0] })
+            )
+        ),
+        document.getElementById('instagram-story-feed-chart')
+    );
+
+    // TikTok Charts
+    const ttViewsData = [
+        { day: 'Mon', views: 950 }, { day: 'Tue', views: 1200 }, { day: 'Wed', views: 1100 },
+        { day: 'Thu', views: 1450 }, { day: 'Fri', views: 1600 }, { day: 'Sat', views: 1750 }, { day: 'Sun', views: 1950 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(BarChart, { data: ttViewsData },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { dataKey: 'day', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Bar, { dataKey: 'views', fill: colors.tiktok, radius: [4, 4, 0, 0] })
+            )
+        ),
+        document.getElementById('tiktok-views-chart')
+    );
+
+    const ttEngagementData = [
+        { day: 'Mon', rate: 13.2 }, { day: 'Tue', rate: 14.5 }, { day: 'Wed', rate: 14.1 },
+        { day: 'Thu', rate: 15.8 }, { day: 'Fri', rate: 15.2 }, { day: 'Sat', rate: 16.4 }, { day: 'Sun', rate: 15.1 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(AreaChart, { data: ttEngagementData },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { dataKey: 'day', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Area, { type: 'monotone', dataKey: 'rate', stroke: colors.tiktok, fill: colors.tiktok, fillOpacity: 0.4 })
+            )
+        ),
+        document.getElementById('tiktok-engagement-chart')
+    );
+
+    const ttTrafficData = [
+        { source: 'For You', value: 68 },
+        { source: 'Following', value: 22 },
+        { source: 'Profile', value: 10 }
+    ];
+    const TT_COLORS = ['#e94057', '#f55969', '#ff7a89'];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(PieChart, {},
+                React.createElement(Pie, { 
+                    data: ttTrafficData, 
+                    dataKey: 'value', 
+                    nameKey: 'source', 
+                    cx: '50%', 
+                    cy: '50%', 
+                    innerRadius: 35,
+                    outerRadius: 55,
+                    paddingAngle: 2
+                }, ttTrafficData.map((entry, index) => 
+                    React.createElement(Cell, { key: `cell-${index}`, fill: TT_COLORS[index % TT_COLORS.length] })
+                )),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px', fontSize: '12px' } })
+            )
+        ),
+        document.getElementById('tiktok-traffic-chart')
+    );
+
+    const ttWatchTimeData = [
+        { day: 'Mon', seconds: 18 }, { day: 'Tue', seconds: 21 }, { day: 'Wed', seconds: 19 },
+        { day: 'Thu', seconds: 24 }, { day: 'Fri', seconds: 23 }, { day: 'Sat', seconds: 26 }, { day: 'Sun', seconds: 25 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(LineChart, { data: ttWatchTimeData },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { dataKey: 'day', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Line, { type: 'monotone', dataKey: 'seconds', stroke: colors.tiktok, strokeWidth: 2, dot: { r: 4 } })
+            )
+        ),
+        document.getElementById('tiktok-watchtime-chart')
+    );
+
+    // Twitter Charts
+    const twImpressionsData = [
+        { day: 'Mon', impressions: 380 }, { day: 'Tue', impressions: 350 }, { day: 'Wed', impressions: 480 },
+        { day: 'Thu', impressions: 520 }, { day: 'Fri', impressions: 460 }, { day: 'Sat', impressions: 620 }, { day: 'Sun', impressions: 710 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(BarChart, { data: twImpressionsData },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { dataKey: 'day', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Bar, { dataKey: 'impressions', fill: colors.twitter, radius: [4, 4, 0, 0] })
+            )
+        ),
+        document.getElementById('twitter-impressions-chart')
+    );
+
+    const twEngagementData = [
+        { day: 'Mon', rate: 5.8 }, { day: 'Tue', rate: 6.1 }, { day: 'Wed', rate: 5.9 },
+        { day: 'Thu', rate: 6.7 }, { day: 'Fri', rate: 6.3 }, { day: 'Sat', rate: 6.9 }, { day: 'Sun', rate: 6.4 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(AreaChart, { data: twEngagementData },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { dataKey: 'day', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Area, { type: 'monotone', dataKey: 'rate', stroke: colors.twitter, fill: colors.twitter, fillOpacity: 0.4 })
+            )
+        ),
+        document.getElementById('twitter-engagement-chart')
+    );
+
+    const twTweetTypesData = [
+        { type: 'Threads', engagement: 45 },
+        { type: 'Media', engagement: 38 },
+        { type: 'Text', engagement: 24 },
+        { type: 'Polls', engagement: 32 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(BarChart, { data: twTweetTypesData, layout: 'vertical' },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { type: 'number', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { type: 'category', dataKey: 'type', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Bar, { dataKey: 'engagement', fill: colors.twitter, radius: [0, 4, 4, 0] })
+            )
+        ),
+        document.getElementById('twitter-tweet-types-chart')
+    );
+
+    const twActionsData = [
+        { day: 'Mon', clicks: 28, likes: 52 }, { day: 'Tue', clicks: 24, likes: 48 },
+        { day: 'Wed', clicks: 38, likes: 64 }, { day: 'Thu', clicks: 42, likes: 68 },
+        { day: 'Fri', clicks: 36, likes: 58 }, { day: 'Sat', clicks: 48, likes: 78 },
+        { day: 'Sun', clicks: 54, likes: 84 }
+    ];
+
+    ReactDOM.render(
+        React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+            React.createElement(LineChart, { data: twActionsData },
+                React.createElement(CartesianGrid, { strokeDasharray: '3 3', stroke: '#222' }),
+                React.createElement(XAxis, { dataKey: 'day', stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(YAxis, { stroke: colors.muted, style: { fontSize: '11px' } }),
+                React.createElement(Tooltip, { contentStyle: { backgroundColor: '#111', border: '1px solid #333', borderRadius: '6px' } }),
+                React.createElement(Line, { type: 'monotone', dataKey: 'clicks', stroke: '#5599ff', strokeWidth: 2, dot: { r: 3 } }),
+                React.createElement(Line, { type: 'monotone', dataKey: 'likes', stroke: colors.twitter, strokeWidth: 2, dot: { r: 3 } })
+            )
+        ),
+        document.getElementById('twitter-actions-chart')
+    );
+}
+</script>
+<script src="charts.js"></script>
+</body>
+</html>
